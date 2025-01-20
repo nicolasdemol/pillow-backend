@@ -1,5 +1,5 @@
 import { Controller, Get, UseGuards, Req, Logger } from '@nestjs/common';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('profile')
 export class ProfileController {
@@ -13,5 +13,5 @@ export class ProfileController {
     );
     const user = req.user;
     return { message: 'Accès autorisé au profil utilisateur', user };
-  }
+  } 
 }

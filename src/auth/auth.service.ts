@@ -50,3 +50,4 @@ export class AuthService {
     return { token };
   }
 }
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
