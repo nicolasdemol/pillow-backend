@@ -1,4 +1,3 @@
-// 📂 src/auth/dto/auth.dto.ts
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
 export class AuthDto {

@@ -1,4 +1,3 @@
-// 📂 src/user/entities/user.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -8,6 +7,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
+import { Role } from '../../auth/enums/role.enum';
 
 @Entity('users')
 export class User {
@@ -31,6 +31,14 @@ export class User {
 
   @Column({ nullable: true })
   avatarUrl: string;
+
+  @Column({
+    type: "enum",
+    enum: Role,
+    array: true,
+    default: [Role.USER],
+  })
+  roles: Role[];
 
   @CreateDateColumn()
   createdAt: Date;

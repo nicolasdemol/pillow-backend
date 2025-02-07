@@ -7,7 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthDto } from './dto/auth.dto';
 import { SignupDto } from './dto/signup.dto';
-import { UserService } from 'src/user/user.service';
+import { UserService } from '../user/user.service';
+import { Role } from './enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -21,12 +22,25 @@ export class AuthService {
    */
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
+  
+    console.log('🔎 Utilisateur trouvé :', user); // Ajoute ce log
+  
     if (user && (await bcrypt.compare(password, user.password))) {
+      console.log('✅ Mot de passe correct');
       const { password, ...result } = user;
-      return result;
+      return result;  
     }
+
+    // Assure-toi que les rôles sont bien présents
+    if (!user.roles || !Array.isArray(user.roles)) {
+      console.log('⚠️ Problème : Pas de rôles définis pour cet utilisateur');
+      return null;
+    }
+  
+    console.log('❌ Utilisateur introuvable ou mauvais mot de passe');
     return null;
   }
+  
 
   /**
    * Gère l'inscription d'un utilisateur.
@@ -48,20 +62,14 @@ export class AuthService {
       email,
       username,
       password: hashedPassword,
+      roles: [Role.USER],
     });
 
-    // Génération du token JWT
-    const payload = { username: user.username, sub: user.id };
-    const token = this.jwtService.sign(payload);
-
+    const payload = { username: user.username, sub: user.id, roles: user.roles };
     return {
       message: 'Inscription réussie',
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-      },
-      access_token: token,
+      user: user,
+      access_token: this.jwtService.sign(payload),
     };
   }
 
@@ -73,14 +81,21 @@ export class AuthService {
 
     // Valide l'utilisateur
     const user = await this.validateUser(email, password);
+
     if (!user) {
       throw new UnauthorizedException('Email ou mot de passe incorrect.');
     }
 
+    // ✅ Vérifie que user.roles est bien défini
+    if (!user.roles) {
+      throw new UnauthorizedException("L'utilisateur n'a pas de rôles attribués.");
+    }
+
     // Génération du token JWT
-    const payload = { username: user.username, sub: user.id };
+    const payload = { username: user.username, sub: user.id, roles: user.roles };
     return {
       message: 'Connexion réussie',
+      user: user,
       access_token: this.jwtService.sign(payload),
     };
   }

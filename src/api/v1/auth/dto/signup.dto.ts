@@ -1,4 +1,3 @@
-// 📂 src/auth/dto/signup.dto.ts
 import { IsEmail, IsNotEmpty, IsOptional, MinLength } from 'class-validator';
 
 export class SignupDto {
@@ -12,3 +11,4 @@ export class SignupDto {
   @IsOptional()
   username?: string;
 }
+  

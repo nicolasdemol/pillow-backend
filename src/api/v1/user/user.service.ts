@@ -1,4 +1,3 @@
-// 📂 src/user/user.service.ts
 import * as bcrypt from 'bcrypt';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -51,11 +50,8 @@ export class UserService {
    * Créer un utilisateur.
    */
   async createUser(userData: Partial<User>): Promise<User> {
-    // Hashage du mot de passe
-    if (userData.password) {
-      userData.password = await bcrypt.hash(userData.password, 10);
-    }
     const user = this.userRepository.create(userData);
     return this.userRepository.save(user);
   }
+  
 }
