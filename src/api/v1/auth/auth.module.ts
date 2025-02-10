@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../users/user.module';
 
 @Module({
   imports: [
@@ -16,10 +16,10 @@ import { UserModule } from '../user/user.module';
       imports: [ConfigModule], // Charge ConfigModule pour accéder aux variables d'env
       inject: [ConfigService], // Injecte ConfigService pour récupérer les variables
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'), // Récupère JWT_SECRET
+        secret: configService.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h'),
-        }, // Durée de validité par défaut : 1h
+          expiresIn: configService.get<string>('ACCESS_TOKEN_EXPIRY', '15m'),
+        }, // Durée de validité par défaut : 15m
       }),
     }),
   ],

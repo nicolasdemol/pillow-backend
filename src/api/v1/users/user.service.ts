@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from './user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -54,4 +54,26 @@ export class UserService {
     return this.userRepository.save(user);
   }
   
+  /**
+   * Méthodes pour enregistrer, valider ou révoquer le Refresh Token.
+   */
+  async updateRefreshToken(userId: number, refreshToken: string) {
+    const hashedToken = await bcrypt.hash(refreshToken, 10);
+    
+    // 🔥 Définition de la date d'expiration (7 jours à partir de maintenant)
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+  
+    await this.userRepository.update(userId, {
+      refreshTokenHash: hashedToken,
+      refreshTokenExpiresAt: expiresAt,
+    });
+  }
+
+  async removeRefreshToken(userId: number) {
+    await this.userRepository.update(userId, {
+      refreshTokenHash: null,
+      refreshTokenExpiresAt: null,
+    });
+  }
 }

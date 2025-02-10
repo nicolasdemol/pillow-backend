@@ -2,12 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './api/v1/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './api/v1/user/user.module';
+import { UserModule } from './api/v1/users/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Rend les variables disponibles partout
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
