@@ -6,11 +6,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserModule } from '../users/user.module';
+import { SessionModule } from '../sessions/session.module';
 
 @Module({
   imports: [
     ConfigModule,
     UserModule,
+    SessionModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule], // Charge ConfigModule pour accéder aux variables d'env

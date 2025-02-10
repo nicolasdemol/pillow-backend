@@ -1,10 +1,18 @@
-import { Controller, Post, Body, Response, Logger, Request, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Response,
+  Logger,
+  Request,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { SignupDto } from './dto/signup.dto';
 import { ConfigService } from '@nestjs/config';
 
-@Controller({ path: 'auth', version: '1' }) // Définit v1
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   private readonly refreshTokenCookiePath: string;
@@ -12,58 +20,98 @@ export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService, // ✅ Injection du ConfigService
+    private readonly configService: ConfigService,
   ) {
-    this.refreshTokenCookiePath = this.configService.get<string>('REFRESH_TOKEN_COOKIE_PATH', '/v1/auth');
-    this.refreshTokenMaxAge = this.configService.get<number>('REFRESH_TOKEN_EXPIRY_DAYS', 7) * 24 * 60 * 60 * 1000;
+    this.refreshTokenCookiePath = this.configService.get<string>(
+      'REFRESH_TOKEN_COOKIE_PATH',
+      '/v1/auth',
+    );
+    this.refreshTokenMaxAge =
+      this.configService.get<number>('REFRESH_TOKEN_EXPIRY_DAYS', 7) *
+      24 *
+      60 *
+      60 *
+      1000;
   }
 
-  /**
-   * Endpoint pour l'inscription de l'utilisateur.
-   */
   @Post('signup')
-  async signup(@Body() signupDto: SignupDto) {
-    this.logger.log('Tentative d’inscription', { email: signupDto.email });
-    return this.authService.signup(signupDto);
-  }
+  async signup(@Body() signupDto: SignupDto, @Response() res) {
+    this.logger.log(`Nouvelle inscription pour ${signupDto.email}`);
 
-  /**
-   * Endpoint pour l'authentification de l'utilisateur.
-   */
-  @Post('login')
-  async login(@Body() authDto: AuthDto, @Response() res) {
-    this.logger.log('Tentative de connexion', authDto.email);
+    const { refreshToken, user } = await this.authService.registerUser(
+      signupDto.email,
+      signupDto.password,
+      signupDto.username,
+    );
 
-    const { access_token, refresh_token } = await this.authService.login(authDto);
-
-    // 🔥 Stocker le Refresh Token dans un Cookie HTTPOnly
-    res.cookie('refresh_token', refresh_token, {
-      httpOnly: true,  // Empêche l'accès au JavaScript (protection XSS)
-      secure: false,    // Seulement en HTTPS (important en prod)
-      sameSite: 'strict', // Protection contre CSRF
+    // 🔄 Stocker le Refresh Token dans un Cookie HTTPOnly
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: false, // ❗ `true` en prod
+      sameSite: 'strict',
       path: this.refreshTokenCookiePath,
       maxAge: this.refreshTokenMaxAge,
     });
 
-    return res.json({ access_token });
+    return res.json({
+      status: 'success',
+      message: 'Inscription réussie',
+      data: { user },
+    });
   }
 
   /**
-   * 🔄 Rafraîchissement du token à partir du Refresh Token stocké dans le Cookie
+   * ✅ Authentification par mot de passe (retourne un Refresh Token).
+   */
+  @Post('login')
+  async login(@Request() req, @Body() authDto: AuthDto, @Response() res) {
+    this.logger.log(`Tentative de connexion pour ${authDto.email}`);
+
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    const ipAddress = req.ip;
+
+    const { refreshToken, user } =
+      await this.authService.authenticateWithPassword(
+        authDto.email,
+        authDto.password,
+        userAgent,
+        ipAddress,
+      );
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      path: this.refreshTokenCookiePath,
+      maxAge: this.refreshTokenMaxAge,
+    });
+
+    return res.json({
+      status: 'success',
+      message: 'Connexion réussie',
+      data: { user },
+    });
+  }
+
+  /**
+   * ✅ Vérifie un Refresh Token et retourne un Access Token.
    */
   @Post('refresh')
   async refreshToken(@Request() req, @Response() res) {
-    this.logger.log('Tentative de refresh_token');
     const refreshToken = req.cookies?.refresh_token;
-    console.log(refreshToken)
-
-    if (!refreshToken) {
+    if (!refreshToken)
       throw new UnauthorizedException('Aucun Refresh Token trouvé');
-    }
 
-    const { access_token, refresh_token: newRefreshToken } = await this.authService.refreshTokens(refreshToken);
+    const userAgent = req.headers['user-agent'] || 'unknown';
+    const ipAddress = req.ip;
 
-    // Met à jour le Refresh Token stocké en Cookie
+    const { accessToken, refreshToken: newRefreshToken } =
+      await this.authService.authenticateWithRefreshToken(
+        refreshToken,
+        userAgent,
+        ipAddress,
+      );
+
     res.cookie('refresh_token', newRefreshToken, {
       httpOnly: true,
       secure: false,
@@ -72,31 +120,33 @@ export class AuthController {
       maxAge: this.refreshTokenMaxAge,
     });
 
-    return res.json({ access_token });
+    return res.json({ status: 'success', data: { accessToken } });
   }
 
+  /**
+   * ✅ Déconnexion (supprime la session en base).
+   */
   @Post('logout')
   async logout(@Request() req, @Response() res) {
-    this.logger.log('Tentative de déconnexion');
     const refreshToken = req.cookies?.refresh_token;
-    console.log(refreshToken)
+    if (!refreshToken)
+      return res.json({ status: 'success', message: 'Déjà déconnecté' });
 
-    if (!refreshToken) {
-      return res.json({ message: 'Déjà déconnecté' });
-    }
+    const payload = await this.authService.validateRefreshToken(refreshToken);
+    await this.authService.logout(
+      payload.sub,
+      refreshToken,
+      req.headers['user-agent'],
+      req.ip,
+    );
 
-    // 🔄 Supprime le Refresh Token de l’utilisateur en base
-    await this.authService.logout(refreshToken);
-
-    // ❌ Supprime le cookie côté client
     res.clearCookie('refresh_token', {
       httpOnly: true,
-      secure: false, // ❗ Doit être `true` en prod avec HTTPS
+      secure: false,
       sameSite: 'strict',
       path: this.refreshTokenCookiePath,
     });
 
-    return res.json({ message: 'Déconnexion réussie' });
+    return res.json({ status: 'success', message: 'Déconnexion réussie' });
   }
-
 }

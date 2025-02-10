@@ -1,7 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from '../users/user.entity';
 
-@Entity()
+@Entity('sessions')
 export class Session {
   @PrimaryGeneratedColumn()
   id: number;
@@ -9,15 +15,18 @@ export class Session {
   @ManyToOne(() => User, (user) => user.sessions, { onDelete: 'CASCADE' })
   user: User;
 
-  @Column()
+  @Column({ unique: true })
   refreshTokenHash: string;
-
-  @Column()
-  ip: string;
 
   @Column()
   userAgent: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column()
+  ipAddress: string;
+
+  @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  expiresAt: Date;
 }

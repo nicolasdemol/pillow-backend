@@ -36,7 +36,7 @@ export class User {
   avatarUrl: string;
 
   @Column({
-    type: "enum",
+    type: 'enum',
     enum: Role,
     array: true,
     default: [Role.USER],
@@ -44,7 +44,7 @@ export class User {
   roles: Role[];
 
   @Column({
-    type: "enum",
+    type: 'enum',
     enum: UserStatus,
     default: UserStatus.ACTIVE,
   })
@@ -71,13 +71,6 @@ export class User {
   // ✅ Sessions utilisateur (Historique des connexions)
   @OneToMany(() => Session, (session) => session.user, { cascade: true })
   sessions: Session[];
-
-  // 🔑 Sécurisation Refresh Token
-  @Column({ nullable: true })
-  refreshTokenHash?: string;
-
-  @Column({ nullable: true })
-  refreshTokenExpiresAt?: Date;
 
   // 📩 Vérification Email
   @Column({ nullable: true })

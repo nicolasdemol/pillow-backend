@@ -53,27 +53,4 @@ export class UserService {
     const user = this.userRepository.create(userData);
     return this.userRepository.save(user);
   }
-  
-  /**
-   * Méthodes pour enregistrer, valider ou révoquer le Refresh Token.
-   */
-  async updateRefreshToken(userId: number, refreshToken: string) {
-    const hashedToken = await bcrypt.hash(refreshToken, 10);
-    
-    // 🔥 Définition de la date d'expiration (7 jours à partir de maintenant)
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-  
-    await this.userRepository.update(userId, {
-      refreshTokenHash: hashedToken,
-      refreshTokenExpiresAt: expiresAt,
-    });
-  }
-
-  async removeRefreshToken(userId: number) {
-    await this.userRepository.update(userId, {
-      refreshTokenHash: null,
-      refreshTokenExpiresAt: null,
-    });
-  }
 }
