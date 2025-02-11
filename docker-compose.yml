@@ -1,18 +1,52 @@
 services:
-  postgres:
+  postgres_api:
     image: postgres
-    container_name: postgres_container
+    container_name: postgres_api
     restart: always
     environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${POSTGRES_API_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_API_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_API_DB}
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_api_data:/var/lib/postgresql/data
     env_file:
-      - .env  # Charge les variables depuis .env
+      - .env
+
+  postgres_keycloak:
+    image: postgres
+    container_name: postgres_keycloak
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_KEYCLOAK_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_KEYCLOAK_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak_container
+    command: start-dev
+    restart: always
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=${KEYCLOAK_DB_HOST}
+      - KC_DB_URL_DATABASE=${KEYCLOAK_DB_NAME}
+      - KC_DB_USERNAME=${KEYCLOAK_DB_USER}
+      - KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
+    ports:
+      - '8080:8080'
+    depends_on:
+      - postgres_keycloak
 
 volumes:
-  postgres_data:
+  postgres_api_data:
+  postgres_keycloak_data:

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
+import * as session from 'express-session';
 import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -8,21 +9,23 @@ async function bootstrap() {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
   });
 
-  // 🔥 Active la gestion des cookies
+  // 🔹 Middleware pour les cookies
   app.use(cookieParser());
 
-  // Active le versionnement globalement
-  app.enableVersioning({
-    type: VersioningType.URI, // Utilise "/v1" dans les URL
-  });
+  // 🔹 Middleware pour les sessions
+  app.use(
+    session({
+      secret: 'supersecretkey', // Changer en production
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false, // `true` en production avec HTTPS
+        maxAge: 24 * 60 * 60 * 1000, // 1 jour
+      },
+    }),
+  );
 
-  // 🌐 Active CORS pour autoriser les cookies si ton frontend est sur un autre domaine
-  app.enableCors({
-    origin: 'http://localhost:3000', // 🔥 Remplace par ton frontend en prod
-    credentials: true, // ✅ Autorise l'envoi des cookies HTTPOnly
-  });
-  
-  
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 API disponible sur http://localhost:3000`);
 }
