@@ -2,98 +2,151 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# 🚀 Pillow Backend & API - Authentications, Users, Subscriptions, Payments, Chats, Contents
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Bienvenue dans **Pillow API**, une architecture backend sécurisée avec **Keycloak SSO (OpenID Connect)**.  
+Ce projet est conçu pour fournir une API robuste et sécurisée pour la gestion des utilisateurs, des paiements, des abonnements, des contenus et des messages.
 
-## Description
+## 🛠️ Stack Technique
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **NestJS** - Framework Node.js modulaire et scalable.
+- **Keycloak** - Gestion des identités et authentification SSO (OpenID Connect).
+- **PostgreSQL** - Base de données relationnelle pour les utilisateurs et les transactions.
+- **Nginx** - Reverse proxy pour le routage des requêtes API et d’authentification.
+- **Docker & Docker Compose** - Conteneurisation et orchestration des services.
+- **Modsecurity** - Pare-feu (à implémenter)
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 📌 Fonctionnalités
+
+### 🔐 Authentification (Keycloak SSO)
+
+- Protocole OpenIDConnect
+- Login & gestion des utilisateurs via Keycloak.
+- Protection des routes API avec JWT.
+- Gestion des rôles et permissions (RBAC).
+
+### 🧑‍💻 API Utilisateurs
+
+- `GET /users/me` → Récupérer son propre profil.
+- `GET /users/:id` → Voir le profil public d’un utilisateur.
+- `PUT /users/me` → Modifier son profil (nom, bio, avatar, etc.).
+- `GET /users/search?query=` → Recherche d’utilisateurs.
+
+### Plan d'implémentation
+
+- [x] **Étape 1 : Authentification et gestion des rôles**
+
+  - ✅ Intégration Keycloak avec NestJS.
+  - ✅ Vérification des rôles.
+
+- [ ] **Étape 2 : Gestion des utilisateurs**
+
+  - ✅ CRUD des profils utilisateurs.
+  - ✅ Gestion des abonnements et des rôles.
+
+- [ ] **Étape 3 : Gestion des paiements**
+
+  - ✅ Intégration Stripe Checkout & Paypal.
+  - ✅ Webhook pour activer les abonnements.
+
+- [ ] **Étape 4 : Gestion du contenu**
+
+  - ✅ API pour publier du contenu.
+  - ✅ Stockage des images/vidéos.
+
+- [ ] **Étape 5 : Messagerie et notifications**
+
+  - ✅ Chat privé avec WebSockets.
+  - ✅ Notifications pour nouveaux messages & abonnements.
+
+- [ ] **Étape 6 : Intelligence Artificielle**
+  - ✅ Récolte des données utilisateurs et stockage vectoriel.
+  - ✅ Contrôle du contenu pré-sélectionné par l'IA.
+
+### 🔄 Reverse Proxy (Nginx)
+
+- **api.pillow.com** → Redirige vers l'API NestJS.
+- **auth.pillow.com** → Redirige vers Keycloak.
+
+### 🛡️ Sécurité
+
+- 🛡️ Keycloak : Gestion des autorisations et des permissions, identifications des activitées suspectes, analyse du traffic.
+- 🔄 Reverse Proxy : Contrôle le flux à l'entrée du domaine.
+- 🔐 WAF (à implémenter) : Mettre en place un pare-feu applicatif pour protéger les API sensibles.
+- 🛑 HTTPS en production : Activer SSL/TLS avec Let's Encrypt via Nginx.
+
+---
+
+## 🚀 Installation & Déploiement
+
+### Cloner le projet
+
+```sh
+git clone https://github.com/nicolasdemol/pillow-backend
+cd pillow-backend
+npm install
 ```
 
-## Compile and run the project
+### Configuration des variables d'environnement
 
-```bash
-# development
-$ npm run start
+```sh
+# ===============================
+#  Configuration globale
+# ===============================
+PORT=3000
 
-# watch mode
-$ npm run start:dev
+# ===============================
+#  Configuration PostgreSQL - API
+# ===============================
+POSTGRES_API_TYPE=postgres
+POSTGRES_API_HOST=postgres_api
+POSTGRES_API_PORT=5432
+POSTGRES_API_USER=api
+POSTGRES_API_PASSWORD=test
+POSTGRES_API_DB=api
+POSTGRES_API_SYNCHRONIZE=true
+POSTGRES_API_LOGGING=false
 
-# production mode
-$ npm run start:prod
+# ===============================
+#  Configuration PostgreSQL - Keycloak
+# ===============================
+POSTGRES_KEYCLOAK_TYPE=postgres
+POSTGRES_KEYCLOAK_HOST=postgres_keycloak
+POSTGRES_KEYCLOAK_USER=keycloak
+POSTGRES_KEYCLOAK_PASSWORD=test
+POSTGRES_KEYCLOAK_DB=keycloak
+
+# ===============================
+# 🔒 Configuration Keycloak
+# ===============================
+KEYCLOAK_ADMIN=admin
+KEYCLOAK_ADMIN_PASSWORD=admin
+KEYCLOAK_URL=http://localhost:8080
+KEYCLOAK_REALM=auth
+KEYCLOAK_CLIENT_ID=backend
+KEYCLOAK_CLIENT_SECRET=test
+KEYCLOAK_CALLBACK_URL=http://localhost:3000
 ```
 
-## Run tests
+### Lancer l’environnement Docker
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```sh
+docker-compose up -d
 ```
 
-## Deployment
+Cela démarre :
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- PostgreSQL (API)
+- PostgreSQL (Keycloak)
+- Keycloak (SSO)
+- NestJS (API)
+- Nginx (Reverse Proxy)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### (Optionnel) Ajouter les entrées DNS (uniquement localhost)
 
-```bash
-$ npm install -g mau
-$ mau deploy
+```sh
+127.0.0.1    api.pillow.com
+127.0.0.1    auth.pillow.com
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
