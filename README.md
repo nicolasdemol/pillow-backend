@@ -150,3 +150,34 @@ Cela démarre :
 127.0.0.1    api.pillow.com
 127.0.0.1    auth.pillow.com
 ```
+
+# Licence propriétaire
+
+© 2025 Nicolas Demol. Tous droits réservés.
+
+Ce logiciel et son code source sont la propriété exclusive de Nicolas Demol.  
+Toute utilisation, reproduction, modification, distribution, ou exploitation sans l'accord explicite de l'auteur est strictement interdite.
+
+---
+
+## **Conditions d'utilisation**
+- ❌ **Interdiction de distribution** : Il est interdit de redistribuer ce logiciel sous quelque forme que ce soit (vente, partage, publication).
+- ❌ **Interdiction de modification** : Vous ne pouvez pas modifier, désassembler ou recompiler le code source sans autorisation.
+- ❌ **Interdiction de revente** : Ce logiciel ne peut être utilisé à des fins commerciales sans un accord écrit.
+- ❌ **Interdiction de publication** : Vous ne pouvez pas héberger ce projet publiquement sur un dépôt accessible (GitHub, GitLab, etc.).
+
+---
+
+## **Utilisation autorisée**
+✅ Ce logiciel peut être utilisé uniquement par **les personnes ou entreprises autorisées**.  
+✅ Toute demande d'utilisation, de licence ou de contribution doit être faite **directement auprès de l'auteur**.
+
+---
+
+## **Sanctions en cas de non-respect**
+Toute violation des conditions ci-dessus pourra donner lieu à **des poursuites légales**.
+
+---
+
+## **Contact**
+Si vous avez des questions sur l'utilisation de ce logiciel, veuillez contacter l'auteur.
