@@ -1,4 +1,41 @@
 services:
+  api:
+    image: node:18
+    container_name: api
+    restart: always
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - '3000:3000'
+    command: npm run start:dev
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app_network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    command: start-dev
+    restart: always
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=${POSTGRES_KEYCLOAK_TYPE}
+      - KC_DB_URL_HOST=${POSTGRES_KEYCLOAK_HOST}
+      - KC_DB_URL_DATABASE=${POSTGRES_KEYCLOAK_DB}
+      - KC_DB_USERNAME=${POSTGRES_KEYCLOAK_USER}
+      - KC_DB_PASSWORD=${POSTGRES_KEYCLOAK_PASSWORD}
+    ports:
+      - '8080:8080'
+    networks:
+      - app_network
+    depends_on:
+      - postgres_keycloak
+    volumes:
+      - ./dist_keycloak:/opt/keycloak/providers/
+
   postgres_api:
     image: postgres
     container_name: postgres_api
@@ -9,6 +46,8 @@ services:
       POSTGRES_DB: ${POSTGRES_API_DB}
     ports:
       - '5432:5432'
+    networks:
+      - app_network
     volumes:
       - postgres_api_data:/var/lib/postgresql/data
     env_file:
@@ -24,29 +63,31 @@ services:
       POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
     ports:
       - '5433:5432'
+    networks:
+      - app_network
     volumes:
       - postgres_keycloak_data:/var/lib/postgresql/data
     env_file:
       - .env
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    container_name: keycloak_container
-    command: start-dev
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
     restart: always
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_DB=postgres
-      - KC_DB_URL_HOST=${KEYCLOAK_DB_HOST}
-      - KC_DB_URL_DATABASE=${KEYCLOAK_DB_NAME}
-      - KC_DB_USERNAME=${KEYCLOAK_DB_USER}
-      - KC_DB_PASSWORD=${KEYCLOAK_DB_PASSWORD}
     ports:
-      - '8080:8080'
+      - '80:80'
+    networks:
+      - app_network
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - postgres_keycloak
+      - api
+      - keycloak
 
 volumes:
   postgres_api_data:
   postgres_keycloak_data:
+
+networks:
+  app_network:
+    driver: bridge
